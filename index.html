@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDB BTO Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        button {
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .result-section {
+            background: #fafafa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 3px solid #333;
+        }
+
+        .result-section h3 {
+            margin-top: 0;
+        }
+
+        .breakdown {
+            margin-top: 10px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-item.total {
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 2px solid #333;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HDB BTO Payment Calculator</h1>
+        <p class="info-text">Calculate your payment breakdown across all three appointments</p>
+
+        <h2>Property Details</h2>
+        
+        <label for="unitPrice">Unit Price ($)</label>
+        <input type="number" id="unitPrice" placeholder="e.g., 450000" min="0" step="1000">
+
+        <div class="grid">
+            <div>
+                <label for="flatType">Flat Type</label>
+                <select id="flatType">
+                    <option value="">Select flat type</option>
+                    <option value="2rm">2-Room Flexi</option>
+                    <option value="3rm">3-Room</option>
+                    <option value="4rm">4-Room</option>
+                    <option value="5rm">5-Room</option>
+                    <option value="3gen">3-Gen</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="loanType">Loan Type</label>
+                <select id="loanType">
+                    <option value="">Select loan type</option>
+                    <option value="no-loan">No Loan</option>
+                    <option value="hdb">HDB Loan</option>
+                    <option value="bank">Bank Loan</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="schemeSection" style="display: none;">
+            <label for="scheme">Payment Scheme</label>
+            <select id="scheme">
+                <option value="no-scheme">No Scheme</option>
+                <option value="staggered">Staggered Downpayment</option>
+                <option value="deferred">Deferred Income Assessment</option>
+            </select>
+        </div>
+
+        <button onclick="calculate()">Calculate Payments</button>
+
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('loanType').addEventListener('change', function() {
+            const schemeSection = document.getElementById('schemeSection');
+            if (this.value === 'hdb' || this.value === 'bank') {
+                schemeSection.style.display = 'block';
+            } else {
+                schemeSection.style.display = 'none';
+            }
+        });
+
+        function calculateBSD(price) {
+            let bsd = 0;
+            
+            if (price <= 180000) {
+                bsd = price * 0.01;
+            } else if (price <= 360000) {
+                bsd = 180000 * 0.01 + (price - 180000) * 0.02;
+            } else if (price <= 1000000) {
+                bsd = 180000 * 0.01 + 180000 * 0.02 + (price - 360000) * 0.03;
+            } else if (price <= 1500000) {
+                bsd = 180000 * 0.01 + 180000 * 0.02 + 640000 * 0.03 + (price - 1000000) * 0.04;
+            } else if (price <= 3000000) {
+                bsd = 180000 * 0.01 + 180000 * 0.02 + 640000 * 0.03 + 500000 * 0.04 + (price - 1500000) * 0.05;
+            } else {
+                bsd = 180000 * 0.01 + 180000 * 0.02 + 640000 * 0.03 + 500000 * 0.04 + 1500000 * 0.05 + (price - 3000000) * 0.06;
+            }
+            
+            return Math.max(1, Math.floor(bsd));
+        }
+
+        function calculateConveyancingFees(price) {
+            let fees = 0;
+            
+            if (price <= 30000) {
+                fees = (price / 100) * 0.90;
+            } else if (price <= 60000) {
+                fees = (30000 / 100) * 0.90 + ((price - 30000) / 100) * 0.72;
+            } else {
+                fees = (30000 / 100) * 0.90 + (30000 / 100) * 0.72 + ((price - 60000) / 100) * 0.60;
+            }
+            
+            return Math.round(fees * 100) / 100;
+        }
+
+        function getOptionFee(flatType) {
+            if (flatType === '2rm') return 500;
+            if (flatType === '3rm') return 1000;
+            return 2000;
+        }
+
+        function getSurveyFees(flatType) {
+            const fees = {
+                '2rm': 163.50,
+                '3rm': 231.60,
+                '4rm': 299.75,
+                '5rm': 354.25,
+                '3gen': 354.25
+            };
+            return fees[flatType] || 0;
+        }
+
+        function getFireInsurance(flatType) {
+            const insurance = {
+                '3rm': 3.27,
+                '4rm': 4.59,
+                '5rm': 5.43,
+                '3gen': 5.43
+            };
+            return insurance[flatType] || 0;
+        }
+
+        function calculate() {
+            const unitPrice = parseFloat(document.getElementById('unitPrice').value);
+            const flatType = document.getElementById('flatType').value;
+            const loanType = document.getElementById('loanType').value;
+            const scheme = document.getElementById('scheme').value;
+
+            if (!unitPrice || !flatType || !loanType) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const results = document.getElementById('results');
+            results.style.display = 'block';
+            
+            let html = '';
+
+            // First Appointment
+            const optionFee = getOptionFee(flatType);
+            html += `
+                <div class="result-section">
+                    <h3>First Appointment (Flat Selection)</h3>
+                    <div class="breakdown">
+                        <div class="breakdown-item">
+                            <span>Option Fee (via NETS)</span>
+                            <span>$${optionFee.toLocaleString()}</span>
+                        </div>
+                        <div class="breakdown-item total">
+                            <span>Total Due</span>
+                            <span>$${optionFee.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <p class="info-text">Payment method: NETS only</p>
+                </div>
+            `;
+
+            // Second Appointment
+            let secondApptTotal = 0;
+            let secondApptBreakdown = [];
+            
+            if (loanType === 'no-loan') {
+                const downpayment = unitPrice * 0.10;
+                secondApptBreakdown.push(['Downpayment (10%)', downpayment]);
+                secondApptBreakdown.push(['Less: Option Fee paid', -optionFee]);
+                secondApptTotal += downpayment - optionFee;
+            } else if (loanType === 'hdb') {
+                let downpaymentPercent = 0.10;
+                if (scheme === 'staggered') downpaymentPercent = 0.05;
+                if (scheme === 'deferred') downpaymentPercent = 0.025;
+                
+                const downpayment = unitPrice * downpaymentPercent;
+                secondApptBreakdown.push([`Downpayment (${downpaymentPercent * 100}%)`, downpayment]);
+                secondApptBreakdown.push(['Less: Option Fee paid', -optionFee]);
+                secondApptTotal += downpayment - optionFee;
+            } else if (loanType === 'bank') {
+                let downpaymentPercent = 0.20;
+                let cashMin = '5% cash + 15% cash/CPF';
+                
+                if (scheme === 'staggered') {
+                    downpaymentPercent = 0.10;
+                    cashMin = '5% cash + 5% cash/CPF';
+                }
+                if (scheme === 'deferred') {
+                    downpaymentPercent = 0.025;
+                    cashMin = '2.5% in cash';
+                }
+                
+                const downpayment = unitPrice * downpaymentPercent;
+                secondApptBreakdown.push([`Downpayment (${downpaymentPercent * 100}%)`, downpayment]);
+                secondApptBreakdown.push(['', cashMin, true]);
+                secondApptBreakdown.push(['Less: Option Fee paid', -optionFee]);
+                secondApptTotal += downpayment - optionFee;
+            }
+
+            const bsd = calculateBSD(unitPrice);
+            secondApptBreakdown.push(['Buyer Stamp Duty', bsd]);
+            secondApptTotal += bsd;
+
+            const conveyancing = calculateConveyancingFees(unitPrice);
+            secondApptBreakdown.push(['HDB Conveyancing Fees', conveyancing]);
+            secondApptTotal += conveyancing;
+
+            if (loanType === 'bank') {
+                secondApptBreakdown.push(['Lawyer Legal Fees (estimate)', '2,500 - 3,000', true]);
+            }
+
+            html += `
+                <div class="result-section">
+                    <h3>Second Appointment (Signing of Lease Agreement)</h3>
+                    <p class="info-text">Estimated 6-9 months from First Appointment</p>
+                    <div class="breakdown">
+            `;
+
+            secondApptBreakdown.forEach(item => {
+                if (item[2]) {
+                    html += `<div class="breakdown-item"><span>${item[0]}</span><span>${item[1]}</span></div>`;
+                } else {
+                    html += `<div class="breakdown-item"><span>${item[0]}</span><span>$${typeof item[1] === 'number' ? item[1].toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : item[1]}</span></div>`;
+                }
+            });
+
+            html += `
+                        <div class="breakdown-item total">
+                            <span>Total Due</span>
+                            <span>$${secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Third Appointment
+            let thirdApptTotal = 0;
+            let thirdApptBreakdown = [];
+            
+            if (loanType === 'no-loan') {
+                const payment = unitPrice * 0.15;
+                thirdApptBreakdown.push(['Balance Payment (15%)', payment]);
+                thirdApptTotal += payment;
+            } else if (loanType === 'hdb') {
+                let paymentPercent = 0.15;
+                if (scheme === 'staggered') paymentPercent = 0.20;
+                if (scheme === 'deferred') paymentPercent = 0.225;
+                
+                const payment = unitPrice * paymentPercent;
+                thirdApptBreakdown.push([`Balance Payment (${paymentPercent * 100}%)`, payment]);
+                thirdApptTotal += payment;
+                
+                // HDB Fees
+                thirdApptBreakdown.push(['Lease In-Escrow Registration Fees', 38.30]);
+                thirdApptBreakdown.push(['Mortgage In-Escrow Registration Fees', 38.30]);
+                thirdApptBreakdown.push(['Mortgage Stamp Duty', 500.00]);
+                thirdApptTotal += 38.30 + 38.30 + 500.00;
+            } else if (loanType === 'bank') {
+                let paymentPercent = 0.05;
+                let cashNote = '';
+                
+                if (scheme === 'staggered') paymentPercent = 0.15;
+                if (scheme === 'deferred') {
+                    paymentPercent = 0.225;
+                    cashNote = '2.5% cash + 20% cash/CPF';
+                }
+                
+                const payment = unitPrice * paymentPercent;
+                thirdApptBreakdown.push([`Balance Payment (${paymentPercent * 100}%)`, payment]);
+                if (cashNote) thirdApptBreakdown.push(['', cashNote, true]);
+                thirdApptTotal += payment;
+                
+                // Bank Loan Fees
+                thirdApptBreakdown.push(['Mortgage In-Escrow Registration Fees', 38.30]);
+                thirdApptBreakdown.push(['Mortgage Stamp Duty', 500.00]);
+                thirdApptTotal += 38.30 + 500.00;
+            }
+
+            // Common fees for all
+            const surveyFees = getSurveyFees(flatType);
+            const fireInsurance = getFireInsurance(flatType);
+            
+            thirdApptBreakdown.push(['Survey Fees', surveyFees]);
+            thirdApptTotal += surveyFees;
+            
+            if (fireInsurance > 0) {
+                thirdApptBreakdown.push(['Fire Insurance for 5 years', fireInsurance]);
+                thirdApptTotal += fireInsurance;
+            }
+
+            if (loanType === 'bank') {
+                thirdApptBreakdown.push(['SP Water/Electricity Activation', 'Variable', true]);
+            }
+
+            html += `
+                <div class="result-section">
+                    <h3>Third Appointment (Key Collection)</h3>
+                    <div class="breakdown">
+            `;
+
+            thirdApptBreakdown.forEach(item => {
+                if (item[2]) {
+                    html += `<div class="breakdown-item"><span>${item[0]}</span><span>${item[1]}</span></div>`;
+                } else {
+                    html += `<div class="breakdown-item"><span>${item[0]}</span><span>$${typeof item[1] === 'number' ? item[1].toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : item[1]}</span></div>`;
+                }
+            });
+
+            html += `
+                        <div class="breakdown-item total">
+                            <span>Total Due</span>
+                            <span>$${thirdApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Summary
+            const totalCash = optionFee + secondApptTotal + thirdApptTotal;
+            html += `
+                <div class="result-section">
+                    <h3>Total Cash Required</h3>
+                    <div class="breakdown">
+                        <div class="breakdown-item">
+                            <span>First Appointment</span>
+                            <span>$${optionFee.toLocaleString()}</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Second Appointment</span>
+                            <span>$${secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="breakdown-item">
+                            <span>Third Appointment</span>
+                            <span>$${thirdApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                        <div class="breakdown-item total">
+                            <span>Total</span>
+                            <span>$${totalCash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        </div>
+                    </div>
+                    <p class="info-text">Note: Some payments may be payable using CPF Ordinary Account. Consult with HDB for CPF usage eligibility.</p>
+                </div>
+            `;
+
+            // Loan Eligibility Check (only for HDB/Bank loans)
+            if (loanType === 'hdb' || loanType === 'bank') {
+                const loanAmount = unitPrice * 0.75; // Max LTV 75%
+                const interestRate = loanType === 'hdb' ? 0.026 : 0.016;
+                const loanTenureYears = 25; // Standard loan tenure
+                const monthlyRate = interestRate / 12;
+                const numPayments = loanTenureYears * 12;
+                
+                // Calculate monthly installment using loan amortization formula
+                const monthlyInstallment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+                
+                // MSR is 30%, so minimum income = monthly installment / 0.30
+                const minMonthlyIncome = monthlyInstallment / 0.30;
+                
+                const rateDisplay = loanType === 'hdb' ? '2.6%' : '1.6%';
+                const rateDisclaimer = loanType === 'bank' ? '<p class="info-text">Note: Bank loan interest rates are floating and subject to change. The rate used here (1.6%) is an estimate.</p>' : '';
+                
+                html += `
+                    <div class="result-section">
+                        <h3>Loan Eligibility Check</h3>
+                        <div class="breakdown">
+                            <div class="breakdown-item">
+                                <span>Loan Amount (75% LTV)</span>
+                                <span>$${loanAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Interest Rate (${loanTenureYears} years)</span>
+                                <span>${rateDisplay}</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>Monthly Installment</span>
+                                <span>$${monthlyInstallment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div class="breakdown-item total">
+                                <span>Min. Gross Monthly Income (MSR 30%)</span>
+                                <span>$${minMonthlyIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                        <p class="info-text">Based on Mortgage Servicing Ratio (MSR) of 30%. For joint applications, combine both applicants' income.</p>
+                        ${rateDisclaimer}
+                    </div>
+                `;
+            }
+
+            results.innerHTML = html;
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
