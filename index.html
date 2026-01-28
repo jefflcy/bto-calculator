@@ -233,11 +233,23 @@
             let fees = 0;
             
             if (price <= 30000) {
-                fees = (price / 100) * 0.90;
+                // First $30,000: $0.09 per $100 or part thereof
+                const units1 = Math.ceil(price / 100);
+                fees = units1 * 0.09;
             } else if (price <= 60000) {
-                fees = (30000 / 100) * 0.90 + ((price - 30000) / 100) * 0.72;
+                // First $30,000: $0.09 per $100 or part thereof
+                const units1 = Math.ceil(30000 / 100); // 300 units
+                // Next $30,000: $0.072 per $100 or part thereof
+                const units2 = Math.ceil((price - 30000) / 100);
+                fees = units1 * 0.09 + units2 * 0.072;
             } else {
-                fees = (30000 / 100) * 0.90 + (30000 / 100) * 0.72 + ((price - 60000) / 100) * 0.60;
+                // First $30,000: $0.09 per $100 or part thereof
+                const units1 = Math.ceil(30000 / 100); // 300 units
+                // Next $30,000: $0.072 per $100 or part thereof
+                const units2 = Math.ceil(30000 / 100); // 300 units
+                // Remaining amount: $0.06 per $100 or part thereof
+                const units3 = Math.ceil((price - 60000) / 100);
+                fees = units1 * 0.09 + units2 * 0.072 + units3 * 0.06;
             }
             
             return Math.round(fees * 100) / 100;
@@ -355,6 +367,13 @@
                 secondApptBreakdown.push(['Lawyer Legal Fees (estimate)', '2,500 - 3,000', true]);
             }
 
+            let secondApptTotalMin = secondApptTotal;
+            let secondApptTotalMax = secondApptTotal;
+            if (loanType === 'bank') {
+                secondApptTotalMin += 2500;
+                secondApptTotalMax += 3000;
+            }
+
             html += `
                 <div class="result-section">
                     <h3>Second Appointment (Signing of Lease Agreement)</h3>
@@ -373,7 +392,10 @@
             html += `
                         <div class="breakdown-item total">
                             <span>Total Due</span>
-                            <span>$${secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span>$${loanType === 'bank'
+                                ? secondApptTotalMin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' - $' + secondApptTotalMax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                                : secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            }</span>
                         </div>
                     </div>
                 </div>
@@ -462,7 +484,17 @@
             `;
 
             // Summary
-            const totalCash = optionFee + secondApptTotal + thirdApptTotal;
+            let totalCash = null;
+            let totalCashMin = null;
+            let totalCashMax = null;
+
+            if (loanType === 'bank') {
+                totalCashMin = optionFee + secondApptTotalMin + thirdApptTotal;
+                totalCashMax = optionFee + secondApptTotalMax + thirdApptTotal;
+            } else {
+                totalCash = optionFee + secondApptTotal + thirdApptTotal;
+            }
+
             html += `
                 <div class="result-section">
                     <h3>Total Cash Required</h3>
@@ -473,7 +505,10 @@
                         </div>
                         <div class="breakdown-item">
                             <span>Second Appointment</span>
-                            <span>$${secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span>$${loanType === 'bank'
+                                ? secondApptTotalMin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' - $' + secondApptTotalMax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                                : secondApptTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            }</span>
                         </div>
                         <div class="breakdown-item">
                             <span>Third Appointment</span>
@@ -481,7 +516,10 @@
                         </div>
                         <div class="breakdown-item total">
                             <span>Total</span>
-                            <span>$${totalCash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span>$${loanType === 'bank'
+                                ? totalCashMin.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' - $' + totalCashMax.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                                : totalCash.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+                            }</span>
                         </div>
                     </div>
                     <p class="info-text">Note: Some payments may be payable using CPF Ordinary Account. Consult with HDB for CPF usage eligibility.</p>
