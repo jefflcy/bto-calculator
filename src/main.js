@@ -1,3 +1,5 @@
+import './style.css'
+
 document.querySelectorAll('.option-row').forEach(function(row) {
     var inputId = row.getAttribute('data-name');
     var input = document.getElementById(inputId);
