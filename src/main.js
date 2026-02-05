@@ -1024,13 +1024,18 @@ function positionTooltip(wrapEl) {
     }
 }
 
+function getClosestTarget(target, selector) {
+    if (!target || typeof target.closest !== 'function') return null;
+    return target.closest(selector);
+}
+
 document.addEventListener('mouseenter', function(e) {
-    var wrap = e.target.closest('.min-income-wrap');
+    var wrap = getClosestTarget(e.target, '.min-income-wrap');
     if (wrap) positionTooltip(wrap);
 }, true);
 
 document.addEventListener('click', function(e) {
-    var wrap = e.target.closest('.min-income-wrap');
+    var wrap = getClosestTarget(e.target, '.min-income-wrap');
     if (wrap) positionTooltip(wrap);
 }, true);
 
@@ -1059,7 +1064,7 @@ document.addEventListener('click', function(e) {
     }
 
     document.addEventListener('mouseenter', function(e) {
-        var wrap = e.target.closest('.min-income-wrap');
+        var wrap = getClosestTarget(e.target, '.min-income-wrap');
         if (!wrap) return;
         if (!wrap.closest('.breakdown-item')) return;
         activeWrap = wrap;
@@ -1067,7 +1072,7 @@ document.addEventListener('click', function(e) {
     }, true);
 
     document.addEventListener('click', function(e) {
-        var wrap = e.target.closest('.min-income-wrap');
+        var wrap = getClosestTarget(e.target, '.min-income-wrap');
         if (!wrap) return;
         if (!wrap.closest('.breakdown-item')) return;
         activeWrap = wrap;
