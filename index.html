@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <title>HDB BTO Calculator</title>
     <style>
         * {
@@ -197,8 +201,259 @@
             background: #555;
         }
 
+        button.secondary {
+            background: #f2f2f2;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        button.secondary:hover {
+            background: #eaeaea;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .share-status {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            z-index: 9999;
+        }
+
+        .modal {
+            width: min(980px, 100%);
+            max-height: min(88vh, 860px);
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: auto;
+            margin: 0;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .modal-body {
+            padding: 14px 16px;
+            overflow: auto;
+        }
+
+        .modal-preview {
+            width: 100%;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #fafafa;
+            overflow: hidden;
+        }
+
+        .modal-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: stretch;
+            justify-content: flex-start;
+            flex-direction: column;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            width: 100%;
+        }
+
         .results {
             margin-top: 30px;
+        }
+
+        .share-card, .share-card * {
+            box-sizing: border-box;
+        }
+
+        .share-card {
+            width: min(900px, 92vw);
+            padding: 18px;
+            background: #fff;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+
+        .share-card .share-header {
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #e6e6e6;
+        }
+
+        .share-card .share-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+        }
+
+        .share-card .share-meta {
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+        }
+
+        .share-card .share-meta span {
+            white-space: nowrap;
+        }
+
+        .share-card .share-footer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #e6e6e6;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .share-card .share-footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .share-card .share-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .share-card .no-export {
+            display: none !important;
+        }
+
+        .page-footer {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            position: relative;
+            padding-right: 28px;
+            padding-left: 28px;
+        }
+
+        .page-footer a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .page-footer .footer-warning {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            color: #999;
+        }
+
+        .page-footer .footer-warning:hover {
+            color: #666;
+        }
+
+        .page-footer .footer-warning .footer-warning-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page-footer .footer-warning svg {
+            display: block;
+        }
+
+        .page-footer .footer-warning .tooltip-content {
+            width: 240px;
+            min-width: 0;
+        }
+
+        .share-card .result-section.loan-eligibility {
+            padding: 12px;
+            border-left-color: #999;
+        }
+
+        .share-card .result-section.loan-eligibility h3 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .share-card .result-section.loan-eligibility .loan-subheader {
+            font-size: 12px;
+            color: #666;
+            margin: -2px 0 10px 0;
+        }
+
+        .share-card .result-section.loan-eligibility .breakdown-item,
+        .share-card .result-section.loan-eligibility .info-text,
+        .share-card .result-section.loan-eligibility .income-mode-controls {
+            font-size: 12px;
+        }
+
+        .share-card .result-section.loan-eligibility .income-mode-controls {
+            display: none;
+        }
+
+        .share-card .tooltip-content {
+            display: none !important;
         }
 
         .result-section {
@@ -278,7 +533,6 @@
             white-space: normal;
         }
 
-        /* Ensure tooltips can overflow their containers */
         .container, .result-section, .breakdown, .breakdown-item, .option-row, .grid {
             overflow: visible;
         }
@@ -293,11 +547,11 @@
         }
 
         .min-income-wrap:hover .tooltip-content,
-        .min-income-wrap.tooltip-open .tooltip-content {
+        .min-income-wrap.tooltip-open .tooltip-content,
+        .min-income-wrap:focus-within .tooltip-content {
             display: block;
         }
 
-        /* Age bubbles: tooltip behavior */
         .option-row[data-name="age"] .tooltip-icon {
             display: none;
         }
@@ -307,7 +561,7 @@
         }
 
         .option-row[data-name="age"] .bubble .tooltip-content {
-            display: block; /* base for JS-controlled visibility */
+            display: block;
             opacity: 0;
             visibility: hidden;
             z-index: 100;
@@ -349,7 +603,6 @@
             }
         }
 
-        /* Tooltip alignment classes for smart positioning */
         .min-income-wrap .tooltip-content.align-left {
             left: 0;
             right: auto;
@@ -464,6 +717,51 @@
         <button onclick="calculate()">Calculate Payments</button>
 
         <div id="results" class="results" style="display: none;"></div>
+
+        <button id="shareButton" type="button" class="secondary" style="display: none;">Share</button>
+        <div id="shareStatus" class="share-status" style="display: none;"></div>
+
+        <div class="page-footer">
+            <a href="https://t.me/iluvcarbonara" target="_blank" rel="noopener noreferrer">Built by @iluvcarbonara :)</a>
+            <span class="footer-warning min-income-wrap no-export" aria-label="tell me what's wrong here">
+                <a
+                    class="footer-warning-link"
+                    href="https://bto-calculator.fillout.com/t/c3Lu3N2Tp9us"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="tell me what's wrong here"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 3.5l10 18H2l10-18z" fill="none" stroke="currentColor" stroke-width="1.8"></path>
+                        <path d="M12 9v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                        <circle cx="12" cy="18" r="1.2" fill="currentColor"></circle>
+                    </svg>
+                </a>
+                <span class="tooltip-content" role="tooltip">
+                    <span class="tooltip-line">tell me what's wrong here</span>
+                </span>
+            </span>
+        </div>
+    </div>
+
+    <div id="shareModalOverlay" class="modal-overlay" style="display:none;" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
+            <div class="modal-header">
+                <h3 id="shareModalTitle" class="modal-title">Preview</h3>
+                <button id="shareModalClose" type="button" class="secondary modal-close">Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-preview">
+                    <img id="shareModalImage" alt="PNG preview" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button id="shareModalCopy" type="button">Copy</button>
+                    <button id="shareModalDownload" type="button">Download</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -499,10 +797,6 @@
             return Math.max(1, Math.floor(bsd));
         }
 
-        // Base HDB conveyancing scale (Items 1, 1a, 1b):
-        // First $30,000 @ 9.0 c. per $100 or part thereof
-        // Next $30,000 @ 7.2 c. per $100 or part thereof
-        // Thereafter @ 6.0 c. per $100 or part thereof
         function calculateConveyancingBase(amount) {
             let fees = 0;
 
@@ -510,24 +804,19 @@
                 const units1 = Math.ceil(amount / 100);
                 fees = units1 * 0.09;
             } else if (amount <= 60000) {
-                const units1 = Math.ceil(30000 / 100); // 300 units
+                const units1 = Math.ceil(30000 / 100);
                 const units2 = Math.ceil((amount - 30000) / 100);
                 fees = units1 * 0.09 + units2 * 0.072;
             } else {
-                const units1 = Math.ceil(30000 / 100); // 300 units
-                const units2 = Math.ceil(30000 / 100); // 300 units
+                const units1 = Math.ceil(30000 / 100);
+                const units2 = Math.ceil(30000 / 100);
                 const units3 = Math.ceil((amount - 60000) / 100);
                 fees = units1 * 0.09 + units2 * 0.072 + units3 * 0.06;
             }
 
-            // Keep to cents before GST
             return Math.round(fees * 100) / 100;
         }
 
-        // Returns fee inclusive of GST, rounded up to the next whole dollar.
-        // For a flat price of $762,280 this gives:
-        // - Sale (no loan / HDB loan): $513
-        // - Mortgage on 75% bank loan: $388
         function calculateConveyancingFees(amount) {
             const GST_RATE = 0.09;
             const base = calculateConveyancingBase(amount);
@@ -568,7 +857,7 @@
             if (age <= 50) return 0.19;
             if (age <= 55) return 0.15;
             if (age <= 60) return 0.12;
-            return 0; // Above 60 not specified, assume 0 for safety or user handling
+            return 0;
         }
 
         let currentMonthlyInstallment = 0;
@@ -680,7 +969,6 @@
             
             let html = '';
 
-            // First Appointment
             const optionFee = getOptionFee(flatType);
             html += `
                 <div class="result-section">
@@ -698,15 +986,11 @@
                 </div>
             `;
 
-            // Second Appointment
             let secondApptTotal = 0;
             let secondApptBreakdown = [];
 
             if (scheme === 'deferred') {
-                // Deferred Income Assessment: treated as "no loan" at 2nd appointment
-                // Same across all loan types: 2.5% downpayment + BSD + HDB Conveyancing Fees (Sale) only
                 const downpayment = unitPrice * 0.025;
-                // For bank loan, show info icon with tooltip about cash requirement
                 const downpaymentLabel = loanType === 'bank'
                     ? 'Downpayment (2.5% <span class="min-income-wrap" style="display:inline-flex;align-items:center;gap:2px;cursor:pointer;"><span class="tooltip-icon">&#9432;</span><span class="tooltip-content"><span class="tooltip-line">Assumes 2.5% in cash here.</span></span></span>)'
                     : 'Downpayment (2.5%)';
@@ -721,8 +1005,6 @@
                 const conveyancingSale = calculateConveyancingFees(unitPrice);
                 secondApptBreakdown.push(['HDB Conveyancing Fees (Sale)', conveyancingSale]);
                 secondApptTotal += conveyancingSale;
-
-                // No external lawyer legal fees at 2nd appointment under Deferred Income Assessment
             } else {
                 if (loanType === 'no-loan') {
                     const downpayment = unitPrice * 0.10;
@@ -747,7 +1029,6 @@
                     }
 
                     const downpayment = unitPrice * downpaymentPercent;
-                    // Info icon with tooltip explaining cash/CPF breakdown
                     const downLabel = `Downpayment (${downpaymentPercent * 100}% <span class="min-income-wrap" style="display:inline-flex;align-items:center;gap:2px;cursor:pointer;"><span class="tooltip-icon">&#9432;</span><span class="tooltip-content"><span class="tooltip-line">Assumes ${cashBreakdown} here.</span></span></span>)`;
                     secondApptBreakdown.push([downLabel, downpayment]);
                     secondApptBreakdown.push(['Less: Option Fee paid', -optionFee]);
@@ -758,11 +1039,8 @@
                 secondApptBreakdown.push(['Buyer Stamp Duty', bsd]);
                 secondApptTotal += bsd;
 
-                // HDB conveyancing fees (inclusive of GST)
                 if (loanType === 'bank') {
-                    // HDB acting in Sale (based on flat price)
                     const saleConveyancing = calculateConveyancingFees(unitPrice);
-                    // HDB acting in Mortgage to bank (based on 75% loan amount)
                     const loanAmountForFees = unitPrice * 0.75;
                     const mortgageConveyancing = calculateConveyancingFees(loanAmountForFees);
                     const totalConveyancing = saleConveyancing + mortgageConveyancing;
@@ -772,8 +1050,6 @@
                     secondApptBreakdown.push(['Total HDB Conveyancing Fees', totalConveyancing]);
                     secondApptTotal += totalConveyancing;
                 } else {
-                    // No loan: Acting in Sale of Flat from HDB
-                    // HDB loan: Acting in Sale of Flat together with mortgage loan from HDB
                     const conveyancing = calculateConveyancingFees(unitPrice);
                     const label = loanType === 'hdb'
                         ? 'HDB Conveyancing Fees (Sale + HDB Mortgage)'
@@ -782,7 +1058,6 @@
                     secondApptTotal += conveyancing;
                 }
 
-                // No deferred scheme here, so apply lawyer range only for bank loans with standard / staggered schemes
                 if (loanType === 'bank') {
                     secondApptBreakdown.push(['Lawyer Legal Fees (estimate)', '2,500 - 3,000', true]);
                 }
@@ -822,14 +1097,10 @@
                 </div>
             `;
 
-            // Third Appointment
             let thirdApptTotal = 0;
             let thirdApptBreakdown = [];
             
             if (loanType === 'no-loan') {
-                // For no loan:
-                // - Standard / staggered schemes use 10% at 2nd appointment → 90% here
-                // - Deferred Income Assessment uses 2.5% at 2nd appointment → 97.5% here
                 const secondApptDownPercent = scheme === 'deferred' ? 0.025 : 0.10;
                 const paymentPercent = 1 - secondApptDownPercent;
                 const payment = unitPrice * paymentPercent;
@@ -844,7 +1115,6 @@
                 thirdApptBreakdown.push([`Balance Payment (${paymentPercent * 100}%)`, payment]);
                 thirdApptTotal += payment;
                 
-                // HDB Fees
                 thirdApptBreakdown.push(['Lease In-Escrow Registration Fees', 38.30]);
                 thirdApptBreakdown.push(['Mortgage In-Escrow Registration Fees', 38.30]);
                 thirdApptBreakdown.push(['Mortgage Stamp Duty', 500.00]);
@@ -861,7 +1131,6 @@
                 const payment = unitPrice * paymentPercent;
                 let balanceLabel;
                 if (scheme === 'deferred') {
-                    // For bank loan under Deferred: clarify that this assumes 2.5% cash already paid at 2nd appointment
                     balanceLabel = 'Balance Payment (22.5% <span class="min-income-wrap" style="display:inline-flex;align-items:center;gap:2px;cursor:pointer;"><span class="tooltip-icon">&#9432;</span><span class="tooltip-content"><span class="tooltip-line">Assumes 2.5% cash paid previously, so 2.5% cash + 20% cash/CPF here.</span></span></span>)';
                 } else {
                     balanceLabel = `Balance Payment (${paymentPercent * 100}%)`;
@@ -869,13 +1138,11 @@
                 thirdApptBreakdown.push([balanceLabel, payment]);
                 thirdApptTotal += payment;
                 
-                // Bank Loan Fees
                 thirdApptBreakdown.push(['Mortgage In-Escrow Registration Fees', 38.30]);
                 thirdApptBreakdown.push(['Mortgage Stamp Duty', 500.00]);
                 thirdApptTotal += 38.30 + 500.00;
             }
 
-            // Common fees for all
             const surveyFees = getSurveyFees(flatType);
             const fireInsurance = getFireInsurance(flatType);
             
@@ -914,7 +1181,6 @@
                 </div>
             `;
 
-            // Summary
             let totalCash = null;
             let totalCashMin = null;
             let totalCashMax = null;
@@ -956,20 +1222,17 @@
                 </div>
             `;
 
-            // Loan Eligibility Check (only for HDB/Bank loans)
             if (loanType === 'hdb' || loanType === 'bank') {
-                const loanAmount = unitPrice * 0.75; // Max LTV 75%
+                const loanAmount = unitPrice * 0.75;
                 const interestRate = loanType === 'hdb' ? 0.026 : 0.016;
-                const loanTenureYears = 25; // Standard loan tenure
+                const loanTenureYears = 25;
                 const monthlyRate = interestRate / 12;
                 const numPayments = loanTenureYears * 12;
                 
-                // Calculate monthly installment using loan amortization formula
                 const monthlyInstallment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / (Math.pow(1 + monthlyRate, numPayments) - 1);
                 
                 currentMonthlyInstallment = monthlyInstallment;
                 
-                // MSR is 30%, so minimum income = monthly installment / 0.30
                 const minMonthlyIncome = monthlyInstallment / 0.30;
                 
                 const incomeMode = currentIncomeMode || 'msr';
@@ -983,7 +1246,7 @@
                 const tooltipHtml = tooltipLines.map(function(t) { return '<span class="tooltip-line">' + t + '</span>'; }).join('');
                 
                 html += `
-                    <div class="result-section">
+                    <div class="result-section loan-eligibility">
                         <h3>Loan Eligibility Check</h3>
                         
                         <div style="margin-bottom: 15px; padding: 10px; background: #eee; border-radius: 4px;">
@@ -1018,10 +1281,12 @@
                             </div>
                             <div class="breakdown-item total">
                                 <span id="minIncomeLabel">Min. Gross Monthly Income (MSR 30%)</span>
-                                <span class="min-income-wrap" id="minIncomeWrap" role="button" tabindex="0" aria-label="Min income details">
+                                <span>
                                     <span id="minIncomeDisplay">$${minMonthlyIncome.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                                    <span class="tooltip-icon" aria-hidden="true">&#9432;</span>
-                                    <span class="tooltip-content" id="minIncomeTooltipContent">${tooltipHtml}</span>
+                                    <span class="min-income-wrap" id="minIncomeWrap" role="button" tabindex="0" aria-label="Min income details">
+                                        <span class="tooltip-icon" aria-hidden="true">&#9432;</span>
+                                        <span class="tooltip-content" id="minIncomeTooltipContent">${tooltipHtml}</span>
+                                    </span>
                                 </span>
                             </div>
                         </div>
@@ -1031,7 +1296,14 @@
 
             results.innerHTML = html;
 
-            // Income mode switch
+            var shareButton = document.getElementById('shareButton');
+            var shareStatus = document.getElementById('shareStatus');
+            if (shareButton) shareButton.style.display = 'block';
+            if (shareStatus) {
+                shareStatus.style.display = 'none';
+                shareStatus.textContent = '';
+            }
+
             var incomeModeSwitch = document.getElementById('incomeModeSwitch');
             if (incomeModeSwitch) {
                 updateCpfSwitchLabel();
@@ -1041,7 +1313,6 @@
                 updateMinIncomeDisplay(incomeModeSwitch.checked ? 'cpf' : (currentIncomeMode || 'msr'));
             }
 
-            // Tooltip: tap/click to toggle on mobile, hover on desktop; close on outside click
             var minIncomeWrap = document.getElementById('minIncomeWrap');
             if (minIncomeWrap) {
                 minIncomeWrap.addEventListener('click', function(e) {
@@ -1064,7 +1335,6 @@
             if (wrap && !wrap.contains(e.target)) wrap.classList.remove('tooltip-open');
         });
 
-        // If age changes after calculation, update CPF toggle label and refresh CPF mode display
         document.querySelectorAll('.option-row').forEach(function(row) {
             var inputId = row.getAttribute('data-name');
             if (inputId !== 'age') return;
@@ -1076,13 +1346,10 @@
             });
         });
 
-        // Simple show/hide for age OA tooltips (no delay / animation)
         (function setupAgeTooltips() {
             var ageRow = document.querySelector('.option-row[data-name="age"]');
             if (!ageRow) return;
 
-            // On touch devices, Safari can synthesize mouseenter/mouseleave around taps,
-            // which causes tooltips to flash. Only bind hover handlers when hover is real.
             var supportsHover = false;
             try {
                 supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -1113,18 +1380,15 @@
                     });
                 }
 
-                // Mobile / touch: tap selected age bubble to show / hide tooltip
                 bubble.addEventListener('click', function() {
                     var ageVal = bubble.getAttribute('data-value');
 
-                    // If user is changing selection, just close any open tooltip (no flash)
                     if (ageVal && lastSelectedAge !== ageVal) {
                         lastSelectedAge = ageVal;
                         closeAllAgeTooltips();
                         return;
                     }
 
-                    // Toggle tooltip immediately on tap
                     if (wrap.classList.contains('show')) {
                         wrap.classList.remove('show');
                     } else {
@@ -1135,18 +1399,306 @@
                 });
             });
 
-            // Close age tooltips on outside tap/click
             document.addEventListener('click', function(e) {
                 if (!ageRow.contains(e.target)) closeAllAgeTooltips();
             });
         })();
 
-        // Smart tooltip positioning: flip sides if overflowing viewport
+        var __shareBusy = false;
+        var __htmlToImagePromise = null;
+        var __sharePng = { blob: null, filename: null, url: null };
+
+        function normalizeSpaces(s) {
+            return String(s || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function getSelectedBubbleText(name) {
+            var row = document.querySelector('.option-row[data-name="' + name + '"]');
+            if (!row) return '';
+            var selected = row.querySelector('.bubble.selected');
+            if (!selected) return '';
+            var clone = selected.cloneNode(true);
+            clone.querySelectorAll('.tooltip-content, .tooltip-icon').forEach(function(el) { el.remove(); });
+            return normalizeSpaces(clone.textContent);
+        }
+
+        function formatCurrency(n) {
+            if (typeof n !== 'number' || !isFinite(n)) return '';
+            return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function ensureHtmlToImageLoaded() {
+            if (window.htmlToImage && typeof window.htmlToImage.toBlob === 'function') return Promise.resolve();
+            if (__htmlToImagePromise) return __htmlToImagePromise;
+
+            __htmlToImagePromise = new Promise(function(resolve, reject) {
+                var script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js';
+                script.async = true;
+                script.onload = function() { resolve(); };
+                script.onerror = function() { reject(new Error('Failed to load image export library. Check your connection and try again.')); };
+                document.head.appendChild(script);
+            });
+            return __htmlToImagePromise;
+        }
+
+        function nextFrame() {
+            return new Promise(function(resolve) {
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(resolve);
+                });
+            });
+        }
+
+        function buildShareCard() {
+            var resultsEl = document.getElementById('results');
+            if (!resultsEl || resultsEl.style.display === 'none' || !resultsEl.innerHTML.trim()) {
+                throw new Error('No results to share yet. Click Calculate first.');
+            }
+
+            var unitPrice = parseFloat(document.getElementById('unitPrice').value);
+            var flatTypeLabel = getSelectedBubbleText('flatType');
+            var schemeLabel = getSelectedBubbleText('scheme');
+            var loanTypeLabel = getSelectedBubbleText('loanType');
+            var ageLabel = getSelectedBubbleText('age');
+
+            var card = document.createElement('div');
+            card.className = 'share-card';
+            card.style.position = 'absolute';
+            card.style.left = '0';
+            card.style.top = '0';
+            card.style.pointerEvents = 'none';
+            card.style.zIndex = '9998';
+
+            var container = document.querySelector('.container');
+            var targetWidth = 900;
+            if (container && container.clientWidth) targetWidth = Math.min(900, Math.max(320, container.clientWidth));
+            card.style.width = targetWidth + 'px';
+
+            var header = document.createElement('div');
+            header.className = 'share-header';
+            header.innerHTML = ''
+                + '<div class="share-title">HDB BTO Payment Breakdown</div>'
+                + '<div class="share-meta">'
+                +   '<span><strong>Unit Price:</strong> ' + (formatCurrency(unitPrice) || '—') + '</span>'
+                +   '<span><strong>Flat:</strong> ' + (flatTypeLabel || '—') + '</span>'
+                +   '<span><strong>Scheme:</strong> ' + (schemeLabel || '—') + '</span>'
+                +   '<span><strong>Loan:</strong> ' + (loanTypeLabel || '—') + '</span>'
+                +   '<span><strong>Age:</strong> ' + (ageLabel || '—') + '</span>'
+                + '</div>';
+
+            var resultsClone = resultsEl.cloneNode(true);
+            resultsClone.removeAttribute('id');
+
+            resultsClone.querySelectorAll('.tooltip-open, .show').forEach(function(el) {
+                el.classList.remove('tooltip-open');
+                el.classList.remove('show');
+            });
+
+            var loanSection = resultsClone.querySelector('.result-section.loan-eligibility');
+            if (loanSection) {
+                var modeSwitch = document.getElementById('incomeModeSwitch');
+                var isCpf = !!(modeSwitch && modeSwitch.checked);
+                var modeText = isCpf ? 'Calculated using CPF OA Contributions' : 'Calculated using MSR';
+
+                var h3 = loanSection.querySelector('h3');
+                if (h3 && !loanSection.querySelector('.loan-subheader')) {
+                    var sub = document.createElement('div');
+                    sub.className = 'loan-subheader';
+                    sub.textContent = modeText;
+                    if (h3.nextSibling) {
+                        loanSection.insertBefore(sub, h3.nextSibling);
+                    } else {
+                        loanSection.appendChild(sub);
+                    }
+                }
+
+                loanSection.querySelectorAll('div[style]').forEach(function(div) {
+                    var style = (div.getAttribute('style') || '').replace(/\s+/g, '').toLowerCase();
+                    if (style.indexOf('background:#eee') !== -1 || style.indexOf('background:#eeeeee') !== -1) {
+                        if (div.parentNode) div.parentNode.removeChild(div);
+                    }
+                });
+            }
+
+            card.appendChild(header);
+            card.appendChild(resultsClone);
+
+            var footer = document.createElement('div');
+            footer.className = 'share-footer';
+            footer.textContent = 'Built by @iluvcarbonara on TG';
+            card.appendChild(footer);
+            document.body.appendChild(card);
+
+            return card;
+        }
+
+        function setShareModalOpen(open) {
+            var overlay = document.getElementById('shareModalOverlay');
+            if (!overlay) return;
+            overlay.style.display = open ? 'flex' : 'none';
+            overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+        }
+
+        function cleanupSharePng() {
+            if (__sharePng.url) {
+                try { URL.revokeObjectURL(__sharePng.url); } catch (e) {}
+            }
+            __sharePng = { blob: null, filename: null, url: null };
+        }
+
+        function showPngPreview(blob, filename) {
+            cleanupSharePng();
+            __sharePng.blob = blob;
+            __sharePng.filename = filename;
+            __sharePng.url = URL.createObjectURL(blob);
+
+            var img = document.getElementById('shareModalImage');
+            if (img) img.src = __sharePng.url;
+
+            var copyBtn = document.getElementById('shareModalCopy');
+            var canCopy = !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem);
+            if (copyBtn) copyBtn.disabled = !canCopy;
+
+            setShareModalOpen(true);
+        }
+
+        async function generateResultsPngBlob() {
+            await ensureHtmlToImageLoaded();
+
+            var card = null;
+            try {
+                card = buildShareCard();
+
+                if (document.fonts && document.fonts.ready) {
+                    try { await document.fonts.ready; } catch (e) {}
+                }
+                await nextFrame();
+
+                var pixelRatio = Math.min(3, Math.max(2, (window.devicePixelRatio || 1)));
+                var blob = await window.htmlToImage.toBlob(card, {
+                    backgroundColor: '#ffffff',
+                    pixelRatio: pixelRatio,
+                    cacheBust: true
+                });
+                if (!blob) throw new Error('Failed to generate PNG.');
+                return blob;
+            } finally {
+                if (card && card.parentNode) card.parentNode.removeChild(card);
+            }
+        }
+
+        async function shareResultsAsPng() {
+            if (__shareBusy) return;
+            __shareBusy = true;
+
+            var shareButton = document.getElementById('shareButton');
+            var shareStatus = document.getElementById('shareStatus');
+
+            function setStatus(msg) {
+                if (!shareStatus) return;
+                shareStatus.textContent = msg || '';
+                shareStatus.style.display = msg ? 'block' : 'none';
+            }
+
+            try {
+                if (shareButton) {
+                    shareButton.disabled = true;
+                    shareButton.textContent = 'Generating…';
+                }
+                setStatus('Preparing image…');
+
+                setStatus('Rendering PNG…');
+
+                var blob = await generateResultsPngBlob();
+                var unitPrice = parseFloat(document.getElementById('unitPrice').value);
+                var dateStr = new Date().toISOString().slice(0, 10);
+                var filename = 'bto-breakdown' + (isFinite(unitPrice) ? ('-' + Math.round(unitPrice)) : '') + '-' + dateStr + '.png';
+
+                setStatus('');
+                showPngPreview(blob, filename);
+            } catch (err) {
+                setStatus((err && err.message) ? err.message : 'Failed to share PNG.');
+            } finally {
+                if (shareButton) {
+                    shareButton.disabled = false;
+                    shareButton.textContent = 'Share';
+                }
+                __shareBusy = false;
+            }
+        }
+
+        (function setupShareButton() {
+            var btn = document.getElementById('shareButton');
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                shareResultsAsPng();
+            });
+        })();
+
+        (function setupShareModal() {
+            var overlay = document.getElementById('shareModalOverlay');
+            var closeBtn = document.getElementById('shareModalClose');
+            var copyBtn = document.getElementById('shareModalCopy');
+            var downloadBtn = document.getElementById('shareModalDownload');
+
+            function close() {
+                setShareModalOpen(false);
+                setTimeout(function() { cleanupSharePng(); }, 100);
+            }
+
+            if (closeBtn) closeBtn.addEventListener('click', close);
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) close();
+                });
+            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    var ov = document.getElementById('shareModalOverlay');
+                    if (ov && ov.style.display !== 'none') close();
+                }
+            });
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    if (!__sharePng.blob) return;
+                    var a = document.createElement('a');
+                    a.href = __sharePng.url;
+                    a.download = __sharePng.filename || 'bto-breakdown.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
+            }
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', async function() {
+                    if (!__sharePng.blob) return;
+                    if (!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem)) return;
+
+                    try {
+                        copyBtn.disabled = true;
+                        copyBtn.textContent = 'Copying…';
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': __sharePng.blob })
+                        ]);
+                        copyBtn.textContent = 'Copied';
+                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 1200);
+                    } catch (e) {
+                        copyBtn.textContent = 'Copy failed';
+                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 1400);
+                    } finally {
+                        copyBtn.disabled = false;
+                    }
+                });
+            }
+        })();
+
         function positionTooltip(wrapEl) {
             var tooltip = wrapEl.querySelector('.tooltip-content');
             if (!tooltip) return;
 
-            // Reset alignment to measure natural position
             tooltip.classList.remove('align-left', 'align-right');
             tooltip.style.left = '';
             tooltip.style.right = '';
@@ -1156,12 +1708,10 @@
             tooltip.style.maxWidth = '';
             tooltip.style.position = '';
 
-            // For age bubbles, use the bubble as positioning reference
             var bubble = wrapEl.closest('.bubble');
             var refEl = bubble || wrapEl;
             var rect = refEl.getBoundingClientRect();
             
-            // Temporarily show tooltip to measure width
             var wasHidden = tooltip.style.display === 'none' || getComputedStyle(tooltip).display === 'none';
             if (wasHidden) {
                 tooltip.style.visibility = 'hidden';
@@ -1178,8 +1728,6 @@
             var viewportHeight = window.innerHeight;
             var padding = 15;
 
-            // For breakdown items (2nd/3rd appointment tooltips), clamp tooltip to viewport
-            // so it never gets cut off on mobile.
             var inBreakdown = !!wrapEl.closest('.breakdown-item');
             if (inBreakdown) {
                 tooltip.style.position = 'fixed';
@@ -1187,7 +1735,6 @@
                 tooltip.style.transform = 'none';
                 tooltip.style.maxWidth = 'min(360px, calc(100vw - ' + (padding * 2) + 'px))';
 
-                // Re-measure after maxWidth is applied (so clamping uses actual width)
                 var wasHidden2 = tooltip.style.display === 'none' || getComputedStyle(tooltip).display === 'none';
                 if (wasHidden2) {
                     tooltip.style.visibility = 'hidden';
@@ -1200,7 +1747,6 @@
                     tooltip.style.visibility = '';
                 }
 
-                // Prefer above; if not enough space, show below.
                 var desiredTop = rect.top - tooltipHeight - 10;
                 var top = desiredTop;
                 if (top < padding) top = rect.bottom + 10;
@@ -1208,8 +1754,6 @@
                     top = Math.max(padding, viewportHeight - padding - tooltipHeight);
                 }
 
-                // Clamp horizontally within viewport.
-                // Try to keep it visually anchored to the icon by centering on it.
                 var iconCenterX = rect.left + (rect.width / 2);
                 var left = iconCenterX - (tooltipWidth / 2);
                 var maxLeft = viewportWidth - padding - tooltipWidth;
@@ -1222,7 +1766,6 @@
                 return;
             }
 
-            // For age bubbles: calculate centered position and check overflow
             var centerX = rect.left + rect.width / 2;
             var tooltipLeft = centerX - tooltipWidth / 2;
             var tooltipRight = centerX + tooltipWidth / 2;
@@ -1235,23 +1778,18 @@
             } else if (overflowsRight && !overflowsLeft) {
                 tooltip.classList.add('align-right');
             }
-            // If neither or both overflow, keep centered (no class added)
         }
 
-        // Position tooltips on hover/show for all .min-income-wrap elements
         document.addEventListener('mouseenter', function(e) {
             var wrap = e.target.closest('.min-income-wrap');
             if (wrap) positionTooltip(wrap);
         }, true);
 
-        // Also position on click/tap
         document.addEventListener('click', function(e) {
             var wrap = e.target.closest('.min-income-wrap');
             if (wrap) positionTooltip(wrap);
         }, true);
 
-        // Keep breakdown tooltips anchored on scroll/resize (mobile especially).
-        // Without this, fixed-position tooltips can "drift" away from the icon while scrolling.
         (function trackBreakdownTooltip() {
             var activeWrap = null;
             var rafId = 0;
@@ -1276,7 +1814,6 @@
                 });
             }
 
-            // Capture opens (hover/click) for breakdown tooltips only.
             document.addEventListener('mouseenter', function(e) {
                 var wrap = e.target.closest('.min-income-wrap');
                 if (!wrap) return;
