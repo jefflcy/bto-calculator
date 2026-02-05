@@ -1,5 +1,14 @@
 import './style.css'
 
+document.addEventListener('DOMContentLoaded', function() {
+    var calcBtn = document.getElementById('calculateButton');
+    if (calcBtn) {
+        calcBtn.addEventListener('click', function() {
+            calculate();
+        });
+    }
+});
+
 document.querySelectorAll('.option-row').forEach(function(row) {
     var inputId = row.getAttribute('data-name');
     var input = document.getElementById(inputId);
